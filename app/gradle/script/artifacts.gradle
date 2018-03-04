@@ -1,0 +1,8 @@
+ext {
+	demoArtifacts = [
+		exec: "demo-exec-${demo.version}.jar",
+		jar: "demo-${demo.version}.jar",
+		war: "demo.war",
+		zip: "demo_ux.zip"
+	]
+}

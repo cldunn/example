@@ -1,0 +1,71 @@
+apply plugin: 'java'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+
+targetCompatibility = JavaVersion.VERSION_1_8
+
+configurations {
+	querydslapt
+	compile.exclude module: 'hibernate-jpa-2.0-api'
+}
+
+sourceSets {
+	main {
+		java.outputDir = file('build/classes')
+		resources {
+			exclude '**/*'
+		}
+	}
+	test {
+		java.outputDir = file('build/classes')
+		resources {
+			exclude '**/*'
+		}
+	}
+	generated {
+		java {
+			srcDirs = ['generated/querydsl']
+		}
+	}
+}
+
+clean {
+	delete sourceSets.generated.java.srcDirs
+}
+
+task generateQueryDsl(type: JavaCompile) {
+	source = sourceSets.main.java
+	classpath = configurations.compile + configurations.querydslapt
+	destinationDir = sourceSets.generated.java.srcDirs.iterator().next()
+	options.compilerArgs = ["-proc:only", "-processor", "com.querydsl.apt.jpa.JPAAnnotationProcessor"]
+}
+
+compileJava {
+	dependsOn generateQueryDsl
+	source generateQueryDsl.destinationDir
+}
+
+/* does GRADLE_USER_HOME/.gradle/gradle.properties define javacPath */
+if (project.hasProperty('javacPath')) {
+	compileJava.options.fork = true
+	compileJava.options.forkOptions.executable = project.property('javacPath')
+}
+
+def buildJar(artifactName, exclusions) {
+	return tasks.create('buildJarTask', Jar) {
+		archiveName = artifactName
+		from sourceSets.main.output
+		from('src/main/resources')
+		excludes = exclusions
+		duplicatesStrategy = 'exclude'
+	}
+}
+
+
+ext {
+	buildJar = this.&buildJar
+}
+
+jar.enabled = false
+// bootRepackage.classifier = 'exec'
+

@@ -1,0 +1,57 @@
+buildscript {
+    ext {
+        springBootVersion = "1.5.10.RELEASE"
+    }
+    
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2"
+        }
+    }
+    
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+        classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
+    }
+}
+
+plugins {
+    id "io.spring.dependency-management" version "1.0.4.RELEASE"
+}
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.5.1'
+}
+
+def getDate() {
+    def date = new Date()
+    def formattedDate = date.format('yyyy-MM-dd')
+
+    return formattedDate
+}
+
+configure(allprojects) { project ->
+    apply plugin: "org.springframework.boot"
+    apply plugin: "eclipse"
+    
+    ext {
+    	demo  = [
+        	version : "1.0.0"
+        ]
+    }
+    
+    ext.gradleScript = "${rootDir}/gradle/script"
+
+    subprojects {
+        apply from: "${gradleScript}/dependencies.gradle"
+        apply from: "${gradleScript}/artifacts.gradle"
+        apply from: "${gradleScript}/eclipse.gradle"
+        apply from: "${gradleScript}/jar.gradle"
+    }
+}

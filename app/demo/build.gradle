@@ -1,0 +1,3 @@
+artifacts {
+	archives buildJar(demoArtifacts.jar, [])
+}
